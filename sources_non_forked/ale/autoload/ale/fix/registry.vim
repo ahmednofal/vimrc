@@ -157,7 +157,7 @@ let s:default_registry = {
 \   },
 \   'hackfmt': {
 \       'function': 'ale#fixers#hackfmt#Fix',
-\       'suggested_filetypes': ['php'],
+\       'suggested_filetypes': ['hack'],
 \       'description': 'Fix Hack files with hackfmt.',
 \   },
 \   'hfmt': {
@@ -169,6 +169,16 @@ let s:default_registry = {
 \       'function': 'ale#fixers#brittany#Fix',
 \       'suggested_filetypes': ['haskell'],
 \       'description': 'Fix Haskell files with brittany.',
+\   },
+\   'hlint': {
+\       'function': 'ale#fixers#hlint#Fix',
+\       'suggested_filetypes': ['haskell'],
+\       'description': 'Refactor Haskell files with hlint.',
+\   },
+\   'stylish-haskell': {
+\       'function': 'ale#fixers#stylish_haskell#Fix',
+\       'suggested_filetypes': ['haskell'],
+\       'description': 'Refactor Haskell files with stylish-haskell.',
 \   },
 \   'refmt': {
 \       'function': 'ale#fixers#refmt#Fix',
@@ -242,32 +252,35 @@ endfunction
 " Add a function for fixing problems to the registry.
 " (name, func, filetypes, desc, aliases)
 function! ale#fix#registry#Add(name, func, filetypes, desc, ...) abort
-    if type(a:name) != type('')
+    " This command will throw from the sandbox.
+    let &l:equalprg=&l:equalprg
+
+    if type(a:name) isnot v:t_string
         throw '''name'' must be a String'
     endif
 
-    if type(a:func) != type('')
+    if type(a:func) isnot v:t_string
         throw '''func'' must be a String'
     endif
 
-    if type(a:filetypes) != type([])
+    if type(a:filetypes) isnot v:t_list
         throw '''filetypes'' must be a List'
     endif
 
     for l:type in a:filetypes
-        if type(l:type) != type('')
+        if type(l:type) isnot v:t_string
             throw 'Each entry of ''filetypes'' must be a String'
         endif
     endfor
 
-    if type(a:desc) != type('')
+    if type(a:desc) isnot v:t_string
         throw '''desc'' must be a String'
     endif
 
     let l:aliases = get(a:000, 0, [])
 
-    if type(l:aliases) != type([])
-    \|| !empty(filter(copy(l:aliases), 'type(v:val) != type('''')'))
+    if type(l:aliases) isnot v:t_list
+    \|| !empty(filter(copy(l:aliases), 'type(v:val) isnot v:t_string'))
         throw '''aliases'' must be a List of String values'
     endif
 
